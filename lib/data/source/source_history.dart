@@ -171,6 +171,46 @@ class SourceHistory {
     return [];
   }
 
+  // History
+  static Future<List<History>> history(String idUser) async {
+    String url = '${Api.history}/history.php';
+
+    Map? responseBody = await AppRequest.post(url, {
+      'id_user': idUser,
+    });
+
+    if (responseBody == null) return [];
+
+    if (responseBody['success']) {
+      List list = responseBody['data'];
+
+      return list.map((e) => History.fromJson(e)).toList();
+    }
+    return [];
+  }
+
+  // Search history
+  static Future<List<History>> historySearch(
+    String idUser,
+    String date,
+  ) async {
+    String url = '${Api.history}/history_search.php';
+
+    Map? responseBody = await AppRequest.post(url, {
+      'id_user': idUser,
+      'date': date,
+    });
+
+    if (responseBody == null) return [];
+
+    if (responseBody['success']) {
+      List list = responseBody['data'];
+
+      return list.map((e) => History.fromJson(e)).toList();
+    }
+    return [];
+  }
+
   // Search income outcome
   static Future<History?> whereDate(
     String idUser,
@@ -181,6 +221,29 @@ class SourceHistory {
     Map? responseBody = await AppRequest.post(url, {
       'id_user': idUser,
       'date': date,
+    });
+
+    if (responseBody == null) return null;
+
+    if (responseBody['success']) {
+      var e = responseBody['data'];
+      return History.fromJson(e);
+    }
+    return null;
+  }
+
+  // Detail history
+  static Future<History?> detail(
+    String idUser,
+    String date,
+    String type,
+  ) async {
+    String url = '${Api.history}/detail.php';
+
+    Map? responseBody = await AppRequest.post(url, {
+      'id_user': idUser,
+      'date': date,
+      'type': type,
     });
 
     if (responseBody == null) return null;

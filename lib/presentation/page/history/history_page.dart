@@ -8,52 +8,40 @@ import 'package:money_record/config/app_format.dart';
 import 'package:money_record/data/model/history.dart';
 import 'package:money_record/data/source/source_history.dart';
 import 'package:money_record/presentation/controller/c_user.dart';
-import 'package:money_record/presentation/controller/history/c_income_outcome.dart';
 import 'package:money_record/presentation/page/history/update_history_page.dart';
 
+import '../../controller/history/c_history.dart';
 import 'detail_history_page.dart';
 
-class IncomeOutcomePage extends StatefulWidget {
-  const IncomeOutcomePage({super.key, required this.type});
-  final String type;
+class HistoryPage extends StatefulWidget {
+  const HistoryPage({super.key});
 
   @override
-  State<IncomeOutcomePage> createState() => _IncomeOutcomePageState();
+  State<HistoryPage> createState() => _HistoryPageState();
 }
 
-class _IncomeOutcomePageState extends State<IncomeOutcomePage> {
-  final cInOut = Get.put(CIncomeOutcome());
+class _HistoryPageState extends State<HistoryPage> {
+  final cHistory = Get.put(CHistory());
   final cUser = Get.put(CUser());
   final controllerSearch = TextEditingController();
 
   refresh() {
-    cInOut.getList(cUser.data.idUser, widget.type);
+    cHistory.getList(cUser.data.idUser);
   }
 
-  menuOption(String value, History history) async {
-    if (value == 'update') {
-      Get.to(UpdateHistoryPage(
-        date: history.date!,
-        idHistory: history.idHistory!,
-      ))?.then((value) {
-        if (value ?? false) {
-          refresh();
-        }
-      });
-    } else if (value == 'delete') {
-      bool? yes = await DInfo.dialogConfirmation(
-        context,
-        'Hapus',
-        'Yakin untuk menghapus history ini?',
-        textNo: 'Batal',
-        textYes: 'Ya',
-      );
+  delete(String idHistory) async {
+    bool? yes = await DInfo.dialogConfirmation(
+      context,
+      'Hapus',
+      'Yakin untuk menghapus history ini?',
+      textNo: 'Batal',
+      textYes: 'Ya',
+    );
 
-      if (yes!) {
-        bool success = await SourceHistory.delete(history.idHistory!);
+    if (yes!) {
+      bool success = await SourceHistory.delete(idHistory);
 
-        if (success) refresh();
-      }
+      if (success) refresh();
     }
   }
 
@@ -70,7 +58,7 @@ class _IncomeOutcomePageState extends State<IncomeOutcomePage> {
         titleSpacing: 0,
         title: Row(
           children: [
-            Text(widget.type),
+            const Text('Riwayat'),
 
             // Search field
             Expanded(
@@ -109,9 +97,8 @@ class _IncomeOutcomePageState extends State<IncomeOutcomePage> {
                     // Search button
                     suffixIcon: IconButton(
                       onPressed: () {
-                        cInOut.search(
+                        cHistory.search(
                           cUser.data.idUser,
-                          widget.type,
                           controllerSearch.text,
                         );
                       },
@@ -131,7 +118,7 @@ class _IncomeOutcomePageState extends State<IncomeOutcomePage> {
           ],
         ),
       ),
-      body: GetBuilder<CIncomeOutcome>(
+      body: GetBuilder<CHistory>(
         builder: (_) {
           if (_.loading) return DView.loadingCircle();
           if (_.list.isEmpty) return DView.empty('Kosong');
@@ -163,6 +150,10 @@ class _IncomeOutcomePageState extends State<IncomeOutcomePage> {
                     child: Row(
                       children: [
                         DView.spaceWidth(),
+                        history.type == 'Pemasukan'
+                            ? Icon(Icons.south_west, color: Colors.green[300])
+                            : Icon(Icons.north_east, color: Colors.red[300]),
+                        DView.spaceWidth(),
                         Text(
                           AppFormat.date(history.date!),
                           style: const TextStyle(
@@ -182,18 +173,12 @@ class _IncomeOutcomePageState extends State<IncomeOutcomePage> {
                             textAlign: TextAlign.end,
                           ),
                         ),
-                        PopupMenuButton<String>(
-                          itemBuilder: (context) => [
-                            const PopupMenuItem(
-                              value: 'update',
-                              child: Text('Update'),
-                            ),
-                            const PopupMenuItem(
-                              value: 'delete',
-                              child: Text('Delete'),
-                            ),
-                          ],
-                          onSelected: (value) => menuOption(value, history),
+                        IconButton(
+                          onPressed: () => delete(history.idHistory!),
+                          icon: Icon(
+                            Icons.delete_forever,
+                            color: Colors.red[300]!,
+                          ),
                         ),
                       ],
                     ),

@@ -2,11 +2,14 @@ import 'package:d_chart/d_chart.dart';
 import 'package:d_view/d_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:money_record/config/app_asset.dart';
 import 'package:money_record/config/app_color.dart';
 import 'package:money_record/config/app_format.dart';
 import 'package:money_record/config/session.dart';
 import 'package:money_record/presentation/controller/c_user.dart';
+import 'package:money_record/presentation/page/history/detail_history_page.dart';
+import 'package:money_record/presentation/page/history/history_page.dart';
 import 'package:money_record/presentation/page/history/income_outcome_page.dart';
 import 'package:money_record/presentation/page/auth/login_page.dart';
 import 'package:money_record/presentation/page/history/add_history_page.dart';
@@ -276,7 +279,9 @@ class _HomePageState extends State<HomePage> {
 
           // Riwayat
           ListTile(
-            onTap: () {},
+            onTap: () {
+              Get.to(() => const HistoryPage());
+            },
             leading: const Icon(Icons.history),
             horizontalTitleGap: 0,
             title: const Text('Riwayat'),
@@ -288,6 +293,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // Monthly
   Row monthly(BuildContext context) {
     return Row(
       children: [
@@ -322,14 +328,16 @@ class _HomePageState extends State<HomePage> {
               }),
 
               // Percentage
-              Center(
-                child: Text(
-                  '${cHome.percentIncome}%',
-                  style: Theme.of(context).textTheme.headline4!.copyWith(
-                        color: AppColor.primary,
-                      ),
-                ),
-              ),
+              Obx(() {
+                return Center(
+                  child: Text(
+                    '${cHome.percentIncome}%',
+                    style: Theme.of(context).textTheme.headline4!.copyWith(
+                          color: AppColor.primary,
+                        ),
+                  ),
+                );
+              }),
             ],
           ),
         ),
@@ -386,6 +394,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // Weekly
   AspectRatio weekly() {
     return AspectRatio(
       aspectRatio: 16 / 9,
@@ -413,6 +422,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // Today
   Material cardToday(BuildContext context) {
     return Material(
       borderRadius: BorderRadius.circular(16),
@@ -445,31 +455,44 @@ class _HomePageState extends State<HomePage> {
               );
             }),
           ),
-          Container(
-            margin: const EdgeInsets.fromLTRB(16, 0, 0, 16),
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(8),
-                bottomLeft: Radius.circular(8),
-              ),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  'Selengkapnya',
-                  style: TextStyle(
-                    color: AppColor.primary,
-                    fontSize: 16,
+          GestureDetector(
+            onTap: () {
+              Get.to(
+                () => DetailHistoryPage(
+                  idUser: cUser.data.idUser!,
+                  date: DateFormat('yyyy-MM-dd').format(
+                    DateTime.now(),
                   ),
+                  type: 'Pengeluaran',
                 ),
-                Icon(
-                  Icons.navigate_next,
-                  color: AppColor.primary,
+              );
+            },
+            child: Container(
+              margin: const EdgeInsets.fromLTRB(16, 0, 0, 16),
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(8),
+                  bottomLeft: Radius.circular(8),
                 ),
-              ],
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    'Selengkapnya',
+                    style: TextStyle(
+                      color: AppColor.primary,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Icon(
+                    Icons.navigate_next,
+                    color: AppColor.primary,
+                  ),
+                ],
+              ),
             ),
           ),
         ],
